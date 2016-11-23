@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Uuseg.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Uuseg" rel="Chapter" href="Uuseg.html">
+<link title="Uuseg_string" rel="Chapter" href="Uuseg_string.html"><link title="Segment" rel="Section" href="#segment">
+<link title="Pretty-printers" rel="Section" href="#pp">
+<title>Uuseg_string</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Uuseg.html" title="Uuseg">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Uuseg_string.html">Uuseg_string</a></h1>
+
+<pre><span class="keyword">module</span> Uuseg_string: <code class="code"><span class="keyword">sig</span></code> <a href="Uuseg_string.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+Unicode text segmentation on UTF-X OCaml strings.
+<p>
+
+    <a href="Uuseg.html"><code class="code"><span class="constructor">Uuseg</span></code></a> helper functions acting directly on UTF-X encoded OCaml
+    strings.
+<p>
+
+    <b>Warning.</b> All these functions silently replace malformed encoded Unicode
+    data by a <code class="code"><span class="constructor">Uutf</span>.u_rep</code> character.
+<p>
+
+    <em>Release 0.9.0 – Daniel Bünzli &lt;daniel.buenzl i@erratique.ch&gt; </em><br>
+</div>
+<hr width="100%">
+<br>
+<h1 id="segment">Segment</h1><br>
+
+<pre><span id="TYPEfolder"><span class="keyword">type</span> <code class="type">'a</code> folder</span> = <code class="type">'a -> string -> 'a</code> </pre>
+<div class="info ">
+The type for segment folders. The function takes an accumulator
+    and a segment. Segments are the UTF-X encoded characters delimited
+    by two <code class="code"><span class="keywordsign">`</span><span class="constructor">Boundary</span></code> occurences. If the segmenter has no initial or
+    final <code class="code"><span class="keywordsign">`</span><span class="constructor">Boundary</span></code>, the folding function inserts an implicit
+    one. Empty segments – which by definition do not happen with
+    the default segmenters – are not reported.<br>
+</div>
+
+
+<pre><span id="VALfold_utf_8"><span class="keyword">val</span> fold_utf_8</span> : <code class="type">[< <a href="Uuseg.html#TYPEboundary">Uuseg.boundary</a> ] -> 'a <a href="Uuseg_string.html#TYPEfolder">folder</a> -> 'a -> string -> 'a</code></pre><div class="info ">
+<code class="code">fold_utf_8 b f acc s</code> folds over the <code class="code">b</code> UTF-8 encoded segments of
+    the UTF-8 encoded string <code class="code">s</code> using <code class="code">f</code> and <code class="code">acc</code>.<br>
+</div>
+
+<pre><span id="VALfold_utf_16be"><span class="keyword">val</span> fold_utf_16be</span> : <code class="type">[< <a href="Uuseg.html#TYPEboundary">Uuseg.boundary</a> ] -> 'a <a href="Uuseg_string.html#TYPEfolder">folder</a> -> 'a -> string -> 'a</code></pre><div class="info ">
+<code class="code">fold_utf16be</code> is like <a href="Uuseg_string.html#VALfold_utf_8"><code class="code"><span class="constructor">Uuseg_string</span>.fold_utf_8</code></a> but on UTF-16BE encoded strings.<br>
+</div>
+
+<pre><span id="VALfold_utf_16le"><span class="keyword">val</span> fold_utf_16le</span> : <code class="type">[< <a href="Uuseg.html#TYPEboundary">Uuseg.boundary</a> ] -> 'a <a href="Uuseg_string.html#TYPEfolder">folder</a> -> 'a -> string -> 'a</code></pre><div class="info ">
+<code class="code">fold_utf16le</code> is like <a href="Uuseg_string.html#VALfold_utf_8"><code class="code"><span class="constructor">Uuseg_string</span>.fold_utf_8</code></a> but on UTF-16BE encoded
+    strings.<br>
+</div>
+<br>
+<h1 id="pp">Pretty-printers</h1>
+<p>
+
+    Using OCaml's <code class="code"><span class="constructor">Format</span>.pp_print_string</code> with Unicode encoded
+    strings will most of the time derail the pretty-printing process
+    for two reasons. First the Unicode encoding of a character may
+    span more than one byte and <code class="code">pp_print_string</code> considers one
+    character to be one byte. Second there may be a discrepancy
+    between the sequence of user-perceived characters (grapheme
+    clusters e.g. é) and the actual sequences of Unicode characters in
+    the data (e.g. é represented by the decomposition e + ´,
+    &lt;U+0065,U+0301&gt;).
+<p>
+
+    The following formatters fix these problems for many (but not all)
+    scripts.<br>
+
+<pre><span id="VALpp_utf_8"><span class="keyword">val</span> pp_utf_8</span> : <code class="type">Format.formatter -> string -> unit</code></pre><div class="info ">
+<code class="code">pp_utf8 ppf s</code> prints the UTF-8 encoded string <code class="code">s</code>. Each grapheme
+    cluster is considered as taking a length of 1.<br>
+</div>
+
+<pre><span id="VALpp_utf_8_text"><span class="keyword">val</span> pp_utf_8_text</span> : <code class="type">Format.formatter -> string -> unit</code></pre><div class="info ">
+<code class="code">pp_utf_8_text ppf s</code> prints the UTF-8 encoded string <code class="code">s</code>. Each
+    grapheme cluster is considered as taking a length of 1. Each
+    line break opportunity is hinted with <code class="code"><span class="constructor">Format</span>.pp_print_break</code>
+    and mandatory line breaks issue a <code class="code"><span class="constructor">Format</span>.pp_force_newline</code> call.
+<p>
+
+    Take into account the following points:
+    <ul>
+<li>Any white space Unicode character
+       occuring before a break opportunity will be translated to a space
+       (U+0020) in output if no break occurs.</li>
+<li>The sequence CR LF (U+000D, U+000A) and all kind of mandatory
+       line breaks are translated to whathever line separator is output
+       by <code class="code"><span class="constructor">Format</span>.pp_force_newline</code>. See <a href="Uuseg_string.html#VALpp_utf_8_lines"><code class="code"><span class="constructor">Uuseg_string</span>.pp_utf_8_lines</code></a> for the
+       list of characters treated as mandatory line breaks.</li>
+<li>Soft hyphens are handled but due to limitations in <code class="code"><span class="constructor">Format</span></code> are
+       not replaced by hard ones on breaks.</li>
+</ul>
+<br>
+</div>
+
+<pre><span id="VALpp_utf_8_lines"><span class="keyword">val</span> pp_utf_8_lines</span> : <code class="type">Format.formatter -> string -> unit</code></pre><div class="info ">
+<code class="code">pp_utf_8_lines ppf s</code> prints the UTF-8 encoded string <code class="code">s</code>. Each
+    grapheme cluster is considered as taking a length of 1. Each
+    mandatory line break (including the sequence CR LF (U+000D,
+    U+000A)) issues a <code class="code"><span class="constructor">Format</span>.pp_force_newline</code> and is translated to
+    whathever line separator this function outputs.
+<p>
+
+    This function correctly handles all kinds of line ends present
+    Unicode, as of 7.0.0 this is FORM FEED (U+000C), LINE TABULATION
+    (U+000B), LINE SEPARATOR (U+2028), PARAGRAPH SEPARATOR (U+2020),
+    NEXT LINE (U+085), LINE FEED (U+000A), CARRIAGE RETURN (U+000D),
+    and the sequence CR LF (U+000D, U+000A).<br>
+</div>
+</body></html>

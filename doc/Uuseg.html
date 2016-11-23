@@ -1,0 +1,294 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="next" href="Uuseg_string.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Uuseg" rel="Chapter" href="Uuseg.html">
+<link title="Uuseg_string" rel="Chapter" href="Uuseg_string.html"><link title="Unicode characters" rel="Section" href="#1_Unicodecharacters">
+<link title="Segment" rel="Section" href="#1_Segment">
+<link title="Custom segmenters" rel="Section" href="#1_Customsegmenters">
+<link title="Limitations" rel="Section" href="#limits">
+<link title="Basics" rel="Section" href="#basics">
+<link title="Examples" rel="Section" href="#examples">
+<title>Uuseg</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Uuseg_string.html" title="Uuseg_string">Next</a>
+</div>
+<h1>Module <a href="type_Uuseg.html">Uuseg</a></h1>
+
+<pre><span class="keyword">module</span> Uuseg: <code class="code"><span class="keyword">sig</span></code> <a href="Uuseg.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+Unicode text segmentation.
+<p>
+
+    <code class="code"><span class="constructor">Uuseg</span></code> segments Unicode text. It implements the locale
+    independent Unicode text segmentation algorithms to detect
+    grapheme cluster, word and sentence boundaries and the Unicode
+    line breaking algorithm to detect line break opportunities.
+<p>
+
+    The module is independent from any IO mechanism or Unicode text
+    data structure and it can process text without a complete
+    in-memory representation.
+<p>
+
+    The supported Unicode version
+    is determined by the <a href="Uuseg.html#VALunicode_version"><code class="code"><span class="constructor">Uuseg</span>.unicode_version</code></a> value.
+<p>
+
+    Consult the <a href="Uuseg.html#basics">basics</a>, <a href="Uuseg.html#limits">limitations</a> and
+    <a href="Uuseg.html#examples">examples</a> of use.
+<p>
+
+    <em>Release 0.9.0 – Daniel Bünzli &lt;daniel.buenzl i@erratique.ch&gt; </em>
+    <h3 id="3_References">References</h3>
+    <ul>
+<li>The Unicode Consortium.
+    <em><a href="http://www.unicode.org/versions/latest">The Unicode Standard</a></em>.
+    (latest version)</li>
+<li>Mark Davis.
+    <em><a href="http://www.unicode.org/reports/tr29/">UAX #29 Unicode Text
+    Segmentation</a></em>. (latest version)</li>
+<li>Andy Heninger.
+    <em><a href="http://www.unicode.org/reports/tr14/">UAX #14 Unicode Line Breaking
+    Algorithm</a></em>. (latest version)</li>
+<li>Web based <a href="http://unicode.org/cldr/utility/breaks.jsp">ICU
+       break utility</a>.</li>
+</ul>
+<br>
+</div>
+<hr width="100%">
+<br>
+<h1 id="1_Unicodecharacters">Unicode characters</h1><br>
+
+<pre><span id="TYPEuchar"><span class="keyword">type</span> <code class="type"></code>uchar</span> = <code class="type">int</code> </pre>
+<div class="info ">
+The type for Unicode characters. A value of this type <b>must</b>
+    be an Unicode
+    <a href="http://www.unicode.org/glossary/#unicode_scalar_value">scalar value</a>
+    which is an integer value in the ranges <code class="code">0x0000</code>...<code class="code">0xD7FF</code> and
+    <code class="code">0xE000</code>...<code class="code">0x10FFFF</code>.<br>
+</div>
+
+
+<pre><span id="VALis_uchar"><span class="keyword">val</span> is_uchar</span> : <code class="type">int -> bool</code></pre><div class="info ">
+<code class="code">is_uchar cp</code> is <code class="code"><span class="keyword">true</span></code> iff <code class="code">cp</code> is an Unicode
+    <a href="http://www.unicode.org/glossary/#Unicode_scalar_value">scalar value</a>.<br>
+</div>
+
+<pre><span id="VALunicode_version"><span class="keyword">val</span> unicode_version</span> : <code class="type">string</code></pre><div class="info ">
+<code class="code">unicode_version</code> is the Unicode version supported by <code class="code"><span class="constructor">Uuseg</span></code>.<br>
+</div>
+<br>
+<h1 id="1_Segment">Segment</h1><br>
+
+<pre><span id="TYPEcustom"><span class="keyword">type</span> <code class="type"></code>custom</span> </pre>
+<div class="info ">
+The type for custom segmenters. See <a href="Uuseg.html#VALcustom"><code class="code"><span class="constructor">Uuseg</span>.custom</code></a>.<br>
+</div>
+
+
+<pre><span id="TYPEboundary"><span class="keyword">type</span> <code class="type"></code>boundary</span> = <code class="type">[ `Custom of <a href="Uuseg.html#TYPEcustom">custom</a><br>       | `Grapheme_cluster<br>       | `Line_break<br>       | `Sentence<br>       | `Word ]</code> </pre>
+<div class="info ">
+The type for boundaries.
+    <ul>
+<li><code class="code"><span class="keywordsign">`</span><span class="constructor">Grapheme_cluster</span></code> determines
+    <a href="http://www.unicode.org/glossary/#extended_grapheme_cluster">
+    extended grapheme clusters</a> boundaries according to UAX 29
+    (corresponds, for most scripts, to user-perceived characters).</li>
+<li><code class="code"><span class="keywordsign">`</span><span class="constructor">Word</span></code> determines word boundaries according to UAX 29.</li>
+<li><code class="code"><span class="keywordsign">`</span><span class="constructor">Sentence</span></code> determines sentence boundaries according to UAX 29.</li>
+<li><code class="code"><span class="keywordsign">`</span><span class="constructor">Line_break</span></code> determines <a href="Uuseg.html#VALmandatory">mandatory</a> line breaks and
+       line break opportunities according to UAX 14.</li>
+</ul>
+<br>
+</div>
+
+
+<pre><span id="VALpp_boundary"><span class="keyword">val</span> pp_boundary</span> : <code class="type">Format.formatter -> <a href="Uuseg.html#TYPEboundary">boundary</a> -> unit</code></pre><div class="info ">
+<code class="code">pp_boundary ppf b</code> prints an unspecified representation of <code class="code">b</code>
+    on <code class="code">ppf</code>.<br>
+</div>
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> </pre>
+<div class="info ">
+The type for Unicode text segmenters.<br>
+</div>
+
+
+<pre><span id="TYPEret"><span class="keyword">type</span> <code class="type"></code>ret</span> = <code class="type">[ `Await | `Boundary | `End | `Uchar of <a href="Uuseg.html#TYPEuchar">uchar</a> ]</code> </pre>
+<div class="info ">
+The type for segmenter results. See <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a>.<br>
+</div>
+
+
+<pre><span id="VALcreate"><span class="keyword">val</span> create</span> : <code class="type">[< <a href="Uuseg.html#TYPEboundary">boundary</a> ] -> <a href="Uuseg.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">create b</code> is an Unicode text segmenter for boundaries of type <code class="code">b</code>.<br>
+</div>
+
+<pre><span id="VALboundary"><span class="keyword">val</span> boundary</span> : <code class="type"><a href="Uuseg.html#TYPEt">t</a> -> <a href="Uuseg.html#TYPEboundary">boundary</a></code></pre><div class="info ">
+<code class="code">boundary s</code> is the type of boundaries detected by <code class="code">s</code>.<br>
+</div>
+
+<pre><span id="VALadd"><span class="keyword">val</span> add</span> : <code class="type"><a href="Uuseg.html#TYPEt">t</a> -> [ `Await | `End | `Uchar of <a href="Uuseg.html#TYPEuchar">uchar</a> ] -> <a href="Uuseg.html#TYPEret">ret</a></code></pre><div class="info ">
+<code class="code">add s v</code> is:
+    <ul>
+<li><code class="code"><span class="keywordsign">`</span><span class="constructor">Boundary</span></code> if there is a boundary at that point in the sequence of
+       characters. The client must then call <code class="code">add</code> with <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code>
+       until <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code> is returned.</li>
+<li><code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span> u</code> if <code class="code">u</code> is the next character in the sequence.
+       The client must then call <code class="code">add</code> with <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code> until <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code> is
+       returned.</li>
+<li><code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code> when the segmenter is ready to add a new <code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span></code>
+       or <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code>.</li>
+<li><code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> when <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> was added and all <code class="code"><span class="keywordsign">`</span><span class="constructor">Boundary</span></code> and <code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span></code> were
+       output.</li>
+</ul>
+
+<p>
+
+    For <code class="code">v</code> use <code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span> u</code> to add a new character to the sequence to
+    segment and <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> to signal the end of sequence. After adding one
+    of these two values always call <code class="code">add</code> with <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code> until <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code>
+    or <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> is returned.<br>
+<b>Raises</b> <code>Invalid_argument</code> if <code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span></code> or <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> is added while
+    that last add did not return <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code> or if an <code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span></code> or <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code>
+    is added after an <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> was already added.
+<p>
+
+    <b>Warning.</b> <code class="code">add</code> deals with Unicode
+    <a href="http://www.unicode.org/glossary/#unicode_scalar_value">
+    scalar values</a>. If you are handling foreign data you must assert
+    that before with <a href="Uuseg.html#VALis_uchar"><code class="code"><span class="constructor">Uuseg</span>.is_uchar</code></a>.<br>
+</div>
+
+<pre><span id="VALmandatory"><span class="keyword">val</span> mandatory</span> : <code class="type"><a href="Uuseg.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">mandatory s</code> is <code class="code"><span class="keyword">true</span></code> if the last <code class="code"><span class="keywordsign">`</span><span class="constructor">Boundary</span></code> returned by <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a>
+    was mandatory. This function only makes sense for <code class="code"><span class="keywordsign">`</span><span class="constructor">Line_break</span></code>
+    segmenters or <code class="code"><span class="keywordsign">`</span><span class="constructor">Custom</span></code> segmenters that sport that notion. For
+    other segmenters or if no <code class="code"><span class="keywordsign">`</span><span class="constructor">Boundary</span></code> was returned so far, <code class="code"><span class="keyword">true</span></code>
+    is returned.<br>
+</div>
+
+<pre><span id="VALcopy"><span class="keyword">val</span> copy</span> : <code class="type"><a href="Uuseg.html#TYPEt">t</a> -> <a href="Uuseg.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">copy s</code> is a copy of <code class="code">s</code> in its current state. Subsequent <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a>s on
+    <code class="code">s</code> do not affect the copy.<br>
+</div>
+
+<pre><span id="VALpp_ret"><span class="keyword">val</span> pp_ret</span> : <code class="type">Format.formatter -> [< <a href="Uuseg.html#TYPEret">ret</a> ] -> unit</code></pre><div class="info ">
+<code class="code">pp_ret ppf v</code> prints an unspecified representation of <code class="code">v</code> on <code class="code">ppf</code>.<br>
+</div>
+<br>
+<h1 id="1_Customsegmenters">Custom segmenters</h1><br>
+
+<pre><span id="VALcustom"><span class="keyword">val</span> custom</span> : <code class="type">?mandatory:('a -> bool) -><br>       name:string -><br>       create:(unit -> 'a) -><br>       copy:('a -> 'a) -><br>       add:('a -> [ `Await | `End | `Uchar of <a href="Uuseg.html#TYPEuchar">uchar</a> ] -> <a href="Uuseg.html#TYPEret">ret</a>) -><br>       unit -> <a href="Uuseg.html#TYPEcustom">custom</a></code></pre><div class="info ">
+<code class="code">create ~mandatory ~name ~create ~copy ~add</code> is a custom segmenter.
+      <ul>
+<li><code class="code">name</code> is a name to identify the segmenter.</li>
+<li><code class="code">create</code> is called when the segmenter is <a href="Uuseg.html#VALcreate">created</a>
+         it should return a custom segmenter value.</li>
+<li><code class="code">copy</code> is called with the segmenter value whenever the
+         segmenter is <a href="Uuseg.html#VALcopy">copied</a>. It should return a copy of the
+         segmenter value.</li>
+<li><code class="code">mandatory</code> is called with the segmenter value to define
+         the result of the <a href="Uuseg.html#VALmandatory"><code class="code"><span class="constructor">Uuseg</span>.mandatory</code></a> function. Defaults always
+         returns <code class="code"><span class="keyword">true</span></code>.</li>
+<li><code class="code">add</code> is called with the segmenter value to define
+         the result of the <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a> value. The returned value
+         should respect the semantics of <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a>. Use the functions
+         <a href="Uuseg.html#VALerr_exp_await"><code class="code"><span class="constructor">Uuseg</span>.err_exp_await</code></a> and <a href="Uuseg.html#VALerr_ended"><code class="code"><span class="constructor">Uuseg</span>.err_ended</code></a> to raise <code class="code"><span class="constructor">Invalid_argument</span></code>
+         exception in <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a>s error cases.</li>
+</ul>
+<br>
+</div>
+
+<pre><span id="VALerr_exp_await"><span class="keyword">val</span> err_exp_await</span> : <code class="type">[< <a href="Uuseg.html#TYPEret">ret</a> ] -> 'a</code></pre><div class="info ">
+<code class="code">err_exp_await fnd</code> should be used by custom segmenters when
+    the client tries to <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a> an <code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span></code> or <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> while the last
+    returned value was not an <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code>.<br>
+</div>
+
+<pre><span id="VALerr_ended"><span class="keyword">val</span> err_ended</span> : <code class="type">[< <a href="Uuseg.html#TYPEret">ret</a> ] -> 'a</code></pre><div class="info ">
+<code class="code">err_ended ()</code> should be used by custom segmenter when the client
+    tries to <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a> <code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span></code> or <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> after <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> was already added.<br>
+</div>
+<br>
+<h1 id="limits">Limitations</h1>
+<p>
+
+    A <code class="code"><span class="keywordsign">`</span><span class="constructor">Grapheme_cluster</span></code> segmenter will always consume only a small
+    bounded amount of memory on any text. Other segmenters will also
+    do so on non-degenerate text, but it's possible to feed them with
+    input that will make them buffer an arbitrary amount of
+    characters.<br>
+<br>
+<h1 id="basics">Basics</h1>
+<p>
+
+    A segmenter is a stateful filter that inputs a sequence of characters
+    and outputs the same sequence except characters are interleaved
+    with <code class="code"><span class="keywordsign">`</span><span class="constructor">Boundary</span></code> values whenever the segmenter detects a boundary.
+<p>
+
+    The function <a href="Uuseg.html#VALcreate"><code class="code"><span class="constructor">Uuseg</span>.create</code></a> returns a new segmenter for a given boundary
+    type:
+<pre class="codepre"><code class="code"><span class="keyword">let</span>&nbsp;words&nbsp;=&nbsp;<span class="constructor">Uuseg</span>.create&nbsp;<span class="keywordsign">`</span><span class="constructor">Word</span><br>
+</code></pre>
+    To add characters to the sequence to segment, call <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a> on
+    <code class="code">words</code> with <code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span> _</code>. To end the sequence call <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a> on <code class="code">words</code>
+    with <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code>. The segmented sequence of characters is returned character
+    by character, interleaved with <code class="code"><span class="keywordsign">`</span><span class="constructor">Boundary</span></code> values at the appropriate
+    places, by the successive calls to <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a>.
+<p>
+
+    The client and the segmenter must wait on each other to limit
+    internal buffering: each time the client adds to the sequence
+    by calling <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a> with <code class="code"><span class="keywordsign">`</span><span class="constructor">Uchar</span></code> or <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code> it must continue to
+    call <a href="Uuseg.html#VALadd"><code class="code"><span class="constructor">Uuseg</span>.add</code></a> with <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code> until the segmenter returns <code class="code"><span class="keywordsign">`</span><span class="constructor">Await</span></code>
+    or <code class="code"><span class="keywordsign">`</span><span class="constructor">End</span></code>. In practice this leads to the following kind of control flow:
+<pre class="codepre"><code class="code"><span class="keyword">let</span>&nbsp;<span class="keyword">rec</span>&nbsp;add&nbsp;acc&nbsp;v&nbsp;=&nbsp;<span class="keyword">match</span>&nbsp;<span class="constructor">Uuseg</span>.add&nbsp;words&nbsp;v&nbsp;<span class="keyword">with</span><br>
+<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Uchar</span>&nbsp;u&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;add&nbsp;(<span class="keywordsign">`</span><span class="constructor">Uchar</span>&nbsp;u&nbsp;::&nbsp;acc)&nbsp;<span class="keywordsign">`</span><span class="constructor">Await</span><br>
+<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Boundary</span>&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;add&nbsp;(<span class="keywordsign">`</span><span class="constructor">B</span>&nbsp;::&nbsp;acc)&nbsp;<span class="keywordsign">`</span><span class="constructor">Await</span><br>
+<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Await</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">End</span>&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;acc<br>
+</code></pre>
+    For example to segment the sequence &lt;<code class="code"><span class="constructor">U</span>+0041</code>, <code class="code"><span class="constructor">U</span>+0020</code>, <code class="code"><span class="constructor">U</span>+0042</code>&gt;
+    (<code class="code"><span class="string">"a b"</span></code>) to a list of characters interleaved with <code class="code"><span class="keywordsign">`</span><span class="constructor">B</span></code> values on word
+    boundaries we can write:
+<pre class="codepre"><code class="code"><span class="keyword">let</span>&nbsp;seq&nbsp;=&nbsp;[<span class="keywordsign">`</span><span class="constructor">Uchar</span>&nbsp;0x0041;&nbsp;<span class="keywordsign">`</span><span class="constructor">Uchar</span>&nbsp;0x0020;&nbsp;<span class="keywordsign">`</span><span class="constructor">Uchar</span>&nbsp;0x0042]<br>
+<span class="keyword">let</span>&nbsp;seq_words&nbsp;=&nbsp;<span class="constructor">List</span>.rev&nbsp;(add&nbsp;(<span class="constructor">List</span>.fold_left&nbsp;add&nbsp;[]&nbsp;seq)&nbsp;<span class="keywordsign">`</span><span class="constructor">End</span>)<br>
+</code></pre><br>
+<br>
+<h1 id="examples">Examples</h1>
+<p>
+
+<code class="code">utf_8_segments seg s</code> is the list of UTF-8 encoded <code class="code">seg</code> segments of
+the UTF-8 encoded string <code class="code">s</code>. This example uses <code class="code"><span class="constructor">Uutf</span></code> to fold over
+the characters of <code class="code">s</code> and to encode the characters in a standard
+OCaml buffer .
+<pre class="codepre"><code class="code"><span class="keyword">let</span>&nbsp;utf_8_segments&nbsp;seg&nbsp;s&nbsp;=<br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;b&nbsp;=&nbsp;<span class="constructor">Buffer</span>.create&nbsp;42&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;flush_segment&nbsp;acc&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;segment&nbsp;=&nbsp;<span class="constructor">Buffer</span>.contents&nbsp;b&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Buffer</span>.clear&nbsp;b;&nbsp;<span class="keyword">if</span>&nbsp;segment&nbsp;=&nbsp;<span class="string">""</span>&nbsp;<span class="keyword">then</span>&nbsp;acc&nbsp;<span class="keyword">else</span>&nbsp;segment&nbsp;::&nbsp;acc<br>
+&nbsp;&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;seg&nbsp;=&nbsp;<span class="constructor">Uuseg</span>.create&nbsp;(seg&nbsp;:&gt;&nbsp;<span class="constructor">Uuseg</span>.boundary)&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;<span class="keyword">rec</span>&nbsp;add&nbsp;acc&nbsp;v&nbsp;=&nbsp;<span class="keyword">match</span>&nbsp;<span class="constructor">Uuseg</span>.add&nbsp;seg&nbsp;v&nbsp;<span class="keyword">with</span><br>
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Uchar</span>&nbsp;u&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Uutf</span>.<span class="constructor">Buffer</span>.add_utf_8&nbsp;b&nbsp;u;&nbsp;add&nbsp;acc&nbsp;<span class="keywordsign">`</span><span class="constructor">Await</span><br>
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Boundary</span>&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;add&nbsp;(flush_segment&nbsp;acc)&nbsp;<span class="keywordsign">`</span><span class="constructor">Await</span><br>
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Await</span>&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;acc<br>
+&nbsp;&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;<span class="keyword">rec</span>&nbsp;uchar&nbsp;acc&nbsp;_&nbsp;=&nbsp;<span class="keyword">function</span><br>
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Uchar</span>&nbsp;_&nbsp;<span class="keyword">as</span>&nbsp;u&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;add&nbsp;acc&nbsp;u<br>
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Malformed</span>&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;add&nbsp;acc&nbsp;(<span class="keywordsign">`</span><span class="constructor">Uchar</span>&nbsp;<span class="constructor">Uutf</span>.u_rep)<br>
+&nbsp;&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="constructor">List</span>.rev&nbsp;(flush_segment&nbsp;(add&nbsp;(<span class="constructor">Uutf</span>.<span class="constructor">String</span>.fold_utf_8&nbsp;uchar&nbsp;[]&nbsp;s)&nbsp;<span class="keywordsign">`</span><span class="constructor">End</span>))<br>
+</code></pre>
+Note that this function can derived directly from <a href="Uuseg_string.html#VALfold_utf_8"><code class="code"><span class="constructor">Uuseg_string</span>.fold_utf_8</code></a>.<br>
+</body></html>
